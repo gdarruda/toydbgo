@@ -8,14 +8,18 @@ import (
 
 	"gdarruda.me/todydbgo/base_types"
 	"github.com/google/uuid"
-	"golang.org/x/exp/constraints"
 )
 
-type Record[K constraints.Ordered] struct {
-	Key   K
+type Record struct {
+	Key   []byte
 	Value []byte
 	Verb  base_types.Verb
 }
+
+// func GetMD5HashWithSum(value []byte) string {
+// 	hash := md5.Sum(value)
+// 	return hex.EncodeToString(hash[:])
+// }
 
 func NewLog(table_name string) (*os.File, *gob.Encoder) {
 

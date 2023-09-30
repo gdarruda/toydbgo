@@ -14,8 +14,8 @@ func TestLoadLog(t *testing.T) {
 
 	log_name := new_log.Name()
 
-	AppendBinary[Record[int]](enc, Record[int]{1, []byte("a"), base_types.PUT})
-	AppendBinary[Record[int]](enc, Record[int]{1, []byte("b"), base_types.MERGE})
+	AppendBinary[Record](enc, Record{[]byte("1"), []byte("a"), base_types.PUT})
+	AppendBinary[Record](enc, Record{[]byte("2"), []byte("b"), base_types.MERGE})
 
 	new_log.Close()
 
@@ -25,7 +25,7 @@ func TestLoadLog(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	LoadLog[Record[int]](log, func(value Record[int]) {})
+	LoadLog[Record](log, func(value Record) {})
 	log.Close()
 
 	os.Remove(log.Name())
