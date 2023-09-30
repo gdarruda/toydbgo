@@ -1,30 +1,30 @@
 package data_structures
 
 import (
+	"bytes"
 	"fmt"
 	"math/rand"
 
 	"gdarruda.me/todydbgo/base_types"
-	"golang.org/x/exp/constraints"
 )
 
-type KeyNotFoundError[K constraints.Ordered] struct {
-	Key K
+type KeyNotFoundError struct {
+	Key []byte
 }
 
-func (knf *KeyNotFoundError[K]) Error() string {
+func (knf *KeyNotFoundError) Error() string {
 	return fmt.Sprintf("key (%v) not found", knf.Key)
 }
 
-type Node[K constraints.Ordered] struct {
-	key   K
+type Node struct {
+	key   []byte
 	value []byte
 	verb  base_types.Verb
-	nexts []*Node[K]
+	nexts []*Node
 }
 
-type SkipList[K constraints.Ordered] struct {
-	heads  []*Node[K]
+type SkipList struct {
+	heads  []*Node
 	levels int
 }
 
@@ -42,11 +42,11 @@ func GetLevel() int {
 	return level
 }
 
-func (this *SkipList[K]) Print() {
+func (sl *SkipList) Print() {
 
-	for i := this.levels - 1; i >= 0; i-- {
+	for i := sl.levels - 1; i >= 0; i-- {
 
-		step := this.heads[i]
+		step := sl.heads[i]
 
 		for {
 
@@ -63,35 +63,35 @@ func (this *SkipList[K]) Print() {
 
 }
 
-func (this *SkipList[K]) Get(key K) ([]byte, error) {
+func (sl *SkipList) Get(key []byte) ([]byte, error) {
 
-	level := this.levels - 1
-	node := this.heads[level]
-	befores := this.heads
+	level := sl.levels - 1
+	node := sl.heads[level]
+	befores := sl.heads
 
 	for {
 
 		if node == nil {
-			return nil, &KeyNotFoundError[K]{Key: key}
+			return nil, &KeyNotFoundError{Key: key}
 		}
 
-		if node.key == key {
+		if bytes.Equal(key, node.key) {
 			return node.value, nil
 		}
 
-		if key < node.key {
+		if bytes.Compare(key, node.key) == -1 {
 
 			level -= 1
 
 			if level < 0 {
-				return nil, &KeyNotFoundError[K]{Key: key}
+				return nil, &KeyNotFoundError{Key: key}
 			}
 
 			node = befores[level]
 
 		}
 
-		if key > node.key {
+		if bytes.Compare(key, node.key) == 1 {
 
 			next_node := node.nexts[level]
 
@@ -100,7 +100,7 @@ func (this *SkipList[K]) Get(key K) ([]byte, error) {
 				level -= 1
 
 				if level < 0 {
-					return nil, &KeyNotFoundError[K]{Key: key}
+					return nil, &KeyNotFoundError{Key: key}
 				}
 
 			} else {
@@ -113,33 +113,33 @@ func (this *SkipList[K]) Get(key K) ([]byte, error) {
 	}
 }
 
-func (this *SkipList[K]) Insert(key K, value []byte) int {
+func (sl *SkipList) Insert(key []byte, value []byte) int {
 
 	level := GetLevel()
 
 	for {
-		if level <= this.levels {
+		if level <= sl.levels {
 			break
 		}
-		this.levels += 1
-		this.heads = append(this.heads, nil)
+		sl.levels += 1
+		sl.heads = append(sl.heads, nil)
 	}
 
-	newNode := Node[K]{
+	newNode := Node{
 		key,
 		value,
 		base_types.PUT,
-		make([]*Node[K], level)}
+		make([]*Node, level)}
 
 	for i := level - 1; i >= 0; i-- {
 
-		if this.heads[i] == nil {
-			this.heads[i] = &newNode
+		if sl.heads[i] == nil {
+			sl.heads[i] = &newNode
 			continue
 		}
 
-		n := this.heads[i]
-		var b *Node[K]
+		n := sl.heads[i]
+		var b *Node
 
 		for {
 
@@ -148,12 +148,12 @@ func (this *SkipList[K]) Insert(key K, value []byte) int {
 				break
 			}
 
-			if key < n.key {
+			if bytes.Compare(key, n.key) == -1 {
 
 				newNode.nexts[i] = n
 
 				if b == nil {
-					this.heads[i] = &newNode
+					sl.heads[i] = &newNode
 				} else {
 					b.nexts[i] = &newNode
 				}
@@ -161,7 +161,7 @@ func (this *SkipList[K]) Insert(key K, value []byte) int {
 				break
 			}
 
-			if key > n.key {
+			if bytes.Compare(key, n.key) == 1 {
 				b = n
 				n = n.nexts[i]
 			}
@@ -172,6 +172,6 @@ func (this *SkipList[K]) Insert(key K, value []byte) int {
 
 }
 
-func NewSkipList[K constraints.Ordered]() SkipList[K] {
-	return SkipList[K]{nil, 0}
+func NewSkipList() SkipList {
+	return SkipList{nil, 0}
 }
