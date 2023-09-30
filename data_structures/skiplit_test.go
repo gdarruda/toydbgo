@@ -72,7 +72,7 @@ func TestGet(t *testing.T) {
 		}
 	}
 
-	not_present_key := []byte(fmt.Sprintf("%03d", 99))
+	not_present_key := []byte(fmt.Sprintf("%03d", 101))
 
 	value, err := list.Get(not_present_key)
 
