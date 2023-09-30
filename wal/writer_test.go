@@ -27,7 +27,11 @@ func TestAppendBinary(t *testing.T) {
 	name := "table_example"
 	log, enc := NewLog(name)
 
-	AppendBinary[Record](enc, Record{[]byte("1"), []byte("a"), base_types.PUT})
+	AppendBinary[Record](
+		enc,
+		NewRecord([]byte("1"),
+			[]byte("a"),
+			base_types.PUT))
 
 	log.Close()
 	os.Remove(log.Name())

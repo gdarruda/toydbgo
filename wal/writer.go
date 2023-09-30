@@ -1,6 +1,7 @@
 package wal
 
 import (
+	"crypto/md5"
 	"encoding/gob"
 	"fmt"
 	"log"
@@ -13,13 +14,26 @@ import (
 type Record struct {
 	Key   []byte
 	Value []byte
+	Hash  [16]byte
 	Verb  base_types.Verb
 }
 
-// func GetMD5HashWithSum(value []byte) string {
-// 	hash := md5.Sum(value)
-// 	return hex.EncodeToString(hash[:])
-// }
+func MD5KeyValue(key []byte, value []byte) [16]byte {
+	return md5.Sum(append(value, key[:]...))
+}
+
+func NewRecord(
+	key []byte,
+	value []byte,
+	verb base_types.Verb) Record {
+
+	return Record{
+		key,
+		value,
+		MD5KeyValue(key, value),
+		base_types.PUT}
+
+}
 
 func NewLog(table_name string) (*os.File, *gob.Encoder) {
 
