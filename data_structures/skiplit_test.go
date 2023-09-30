@@ -9,7 +9,9 @@ import (
 
 func TestNewList(t *testing.T) {
 
-	empty_list := NewSkipList()
+	empty_list := NewSkipList(
+		bytes.Compare,
+		func(v []byte) string { return string(v[:]) })
 
 	if empty_list.heads != nil {
 		t.Fatalf("Expected empty list: %v", empty_list.heads)
@@ -23,7 +25,9 @@ func TestNewList(t *testing.T) {
 
 func TestInsert(t *testing.T) {
 
-	list := NewSkipList()
+	list := NewSkipList(
+		bytes.Compare,
+		func(v []byte) string { return string(v[:]) })
 
 	list.Insert([]byte("13"), []byte("13"))
 	list.Insert([]byte("10"), []byte("10"))
@@ -47,7 +51,9 @@ func TestInsert(t *testing.T) {
 
 func TestGet(t *testing.T) {
 
-	list := NewSkipList()
+	list := NewSkipList(
+		bytes.Compare,
+		func(v []byte) string { return string(v[:]) })
 
 	for i := 100; i >= 0; i-- {
 
@@ -80,7 +86,7 @@ func TestGet(t *testing.T) {
 		t.Fatalf("Value 101 wasn't added, shouldn't be retrieved")
 	}
 
-	if err.Error() != (&KeyNotFoundError{not_present_key}).Error() {
+	if err.Error() != (&KeyNotFoundError{"101"}).Error() {
 		t.Fatalf("Value 101 wasn't added, should cause an error")
 	}
 

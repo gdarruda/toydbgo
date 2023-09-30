@@ -1,7 +1,6 @@
 package data_structures
 
 import (
-	"bytes"
 	"fmt"
 	"math/rand"
 
@@ -9,7 +8,7 @@ import (
 )
 
 type KeyNotFoundError struct {
-	Key []byte
+	Key string
 }
 
 func (knf *KeyNotFoundError) Error() string {
@@ -24,8 +23,10 @@ type Node struct {
 }
 
 type SkipList struct {
-	heads  []*Node
-	levels int
+	heads     []*Node
+	levels    int
+	compare   func([]byte, []byte) int
+	formatKey func([]byte) string
 }
 
 func GetLevel() int {
@@ -55,7 +56,7 @@ func (sl *SkipList) Print() {
 				break
 			}
 
-			fmt.Printf("%v --> ", step.key)
+			fmt.Printf("%v --> ", sl.formatKey(step.key))
 			step = step.nexts[i]
 		}
 
@@ -72,26 +73,26 @@ func (sl *SkipList) Get(key []byte) ([]byte, error) {
 	for {
 
 		if node == nil {
-			return nil, &KeyNotFoundError{Key: key}
+			return nil, &KeyNotFoundError{Key: sl.formatKey(key)}
 		}
 
-		if bytes.Equal(key, node.key) {
+		if sl.compare(key, node.key) == 0 {
 			return node.value, nil
 		}
 
-		if bytes.Compare(key, node.key) == -1 {
+		if sl.compare(key, node.key) == -1 {
 
 			level -= 1
 
 			if level < 0 {
-				return nil, &KeyNotFoundError{Key: key}
+				return nil, &KeyNotFoundError{Key: sl.formatKey(key)}
 			}
 
 			node = befores[level]
 
 		}
 
-		if bytes.Compare(key, node.key) == 1 {
+		if sl.compare(key, node.key) == 1 {
 
 			next_node := node.nexts[level]
 
@@ -100,7 +101,7 @@ func (sl *SkipList) Get(key []byte) ([]byte, error) {
 				level -= 1
 
 				if level < 0 {
-					return nil, &KeyNotFoundError{Key: key}
+					return nil, &KeyNotFoundError{Key: sl.formatKey(key)}
 				}
 
 			} else {
@@ -148,7 +149,7 @@ func (sl *SkipList) Insert(key []byte, value []byte) int {
 				break
 			}
 
-			if bytes.Compare(key, n.key) == -1 {
+			if sl.compare(key, n.key) == -1 {
 
 				newNode.nexts[i] = n
 
@@ -161,7 +162,7 @@ func (sl *SkipList) Insert(key []byte, value []byte) int {
 				break
 			}
 
-			if bytes.Compare(key, n.key) == 1 {
+			if sl.compare(key, n.key) == 1 {
 				b = n
 				n = n.nexts[i]
 			}
@@ -172,6 +173,10 @@ func (sl *SkipList) Insert(key []byte, value []byte) int {
 
 }
 
-func NewSkipList() SkipList {
-	return SkipList{nil, 0}
+func NewSkipList(compare func([]byte, []byte) int, formatKey func([]byte) string) SkipList {
+
+	return SkipList{nil,
+		0,
+		compare,
+		formatKey}
 }
