@@ -55,3 +55,8 @@ func NewLog(table_name string) WAL {
 func (wal *WAL) Append(content Record) error {
 	return wal.enc.Encode(content)
 }
+
+func (wal *WAL) Delete() {
+	wal.file.Close()
+	os.Remove(wal.file.Name())
+}

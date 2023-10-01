@@ -1,7 +1,6 @@
 package wal
 
 import (
-	"os"
 	"strings"
 	"testing"
 
@@ -17,8 +16,7 @@ func TestNewLog(t *testing.T) {
 		t.Fatalf("Expected filename starting with log_")
 	}
 
-	wal.file.Close()
-	os.Remove(wal.file.Name())
+	wal.Delete()
 
 }
 
@@ -32,6 +30,5 @@ func TestAppend(t *testing.T) {
 		[]byte("a"),
 		base_types.PUT))
 
-	wal.file.Close()
-	os.Remove(wal.file.Name())
+	wal.Delete()
 }
