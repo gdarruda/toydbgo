@@ -18,6 +18,11 @@ type Record struct {
 	Verb  base_types.Verb
 }
 
+type WAL struct {
+	file *os.File
+	enc  *gob.Encoder
+}
+
 func MD5KeyValue(key []byte, value []byte) [16]byte {
 	return md5.Sum(append(value, key[:]...))
 }
@@ -35,7 +40,7 @@ func NewRecord(
 
 }
 
-func NewLog(table_name string) (*os.File, *gob.Encoder) {
+func NewLog(table_name string) WAL {
 
 	f, err := os.Create(fmt.Sprintf("%v_%v.txt", table_name, uuid.NewString()))
 
@@ -43,10 +48,10 @@ func NewLog(table_name string) (*os.File, *gob.Encoder) {
 		log.Fatal(err)
 	}
 
-	return f, gob.NewEncoder(f)
+	return WAL{f, gob.NewEncoder(f)}
 
 }
 
-func AppendBinary[V any](enc *gob.Encoder, content V) error {
-	return enc.Encode(content)
+func (wal *WAL) Append(content Record) error {
+	return wal.enc.Encode(content)
 }

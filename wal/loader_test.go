@@ -10,14 +10,14 @@ import (
 func TestLoadLog(t *testing.T) {
 
 	name := "table_example"
-	new_log, enc := NewLog(name)
+	wal := NewLog(name)
 
-	log_name := new_log.Name()
+	log_name := wal.file.Name()
 
-	AppendBinary[Record](enc, NewRecord([]byte("1"), []byte("a"), base_types.PUT))
-	AppendBinary[Record](enc, NewRecord([]byte("1"), []byte("a"), base_types.MERGE))
+	wal.Append(NewRecord([]byte("1"), []byte("a"), base_types.PUT))
+	wal.Append(NewRecord([]byte("1"), []byte("b"), base_types.MERGE))
 
-	new_log.Close()
+	wal.file.Close()
 
 	log, err := os.Open(log_name)
 
@@ -25,7 +25,8 @@ func TestLoadLog(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	LoadLog(log, func(value Record) {})
+	wal.Load(log, func(value Record, wal *WAL) {})
+
 	log.Close()
 
 	os.Remove(log.Name())

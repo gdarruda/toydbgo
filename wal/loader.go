@@ -7,9 +7,9 @@ import (
 	"os"
 )
 
-func LoadLog(
+func (wal *WAL) Load(
 	file *os.File,
-	apply func(Record)) {
+	apply func(Record, *WAL)) {
 
 	dec := gob.NewDecoder(file)
 
@@ -30,7 +30,7 @@ func LoadLog(
 			log.Fatal("loaded values and hash don't match:", err)
 		}
 
-		apply(v)
-	}
+		apply(v, wal)
 
+	}
 }

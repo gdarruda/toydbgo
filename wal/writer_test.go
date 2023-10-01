@@ -11,28 +11,27 @@ import (
 func TestNewLog(t *testing.T) {
 
 	name := "table_example"
-	file, _ := NewLog(name)
+	wal := NewLog(name)
 
-	if !strings.HasPrefix(file.Name(), name+"_") {
+	if !strings.HasPrefix(wal.file.Name(), name+"_") {
 		t.Fatalf("Expected filename starting with log_")
 	}
 
-	file.Close()
-	os.Remove(file.Name())
+	wal.file.Close()
+	os.Remove(wal.file.Name())
 
 }
 
-func TestAppendBinary(t *testing.T) {
+func TestAppend(t *testing.T) {
 
 	name := "table_example"
-	log, enc := NewLog(name)
+	wal := NewLog(name)
 
-	AppendBinary[Record](
-		enc,
-		NewRecord([]byte("1"),
-			[]byte("a"),
-			base_types.PUT))
+	wal.Append(NewRecord(
+		[]byte("1"),
+		[]byte("a"),
+		base_types.PUT))
 
-	log.Close()
-	os.Remove(log.Name())
+	wal.file.Close()
+	os.Remove(wal.file.Name())
 }
