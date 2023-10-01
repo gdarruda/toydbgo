@@ -16,9 +16,9 @@ func (knf *KeyNotFoundError) Error() string {
 }
 
 type Node struct {
-	key   []byte
-	value []byte
-	verb  base_types.Verb
+	Key   []byte
+	Value []byte
+	Verb  base_types.Verb
 	nexts []*Node
 }
 
@@ -56,7 +56,7 @@ func (sl *SkipList) Print() {
 				break
 			}
 
-			fmt.Printf("%v --> ", sl.formatKey(step.key))
+			fmt.Printf("%v --> ", sl.formatKey(step.Key))
 			step = step.nexts[i]
 		}
 
@@ -64,7 +64,7 @@ func (sl *SkipList) Print() {
 
 }
 
-func (sl *SkipList) Get(key []byte) ([]byte, error) {
+func (sl *SkipList) Get(key []byte) (*Node, error) {
 
 	level := sl.levels - 1
 	node := sl.heads[level]
@@ -76,11 +76,11 @@ func (sl *SkipList) Get(key []byte) ([]byte, error) {
 			return nil, &KeyNotFoundError{Key: sl.formatKey(key)}
 		}
 
-		if sl.compare(key, node.key) == 0 {
-			return node.value, nil
+		if sl.compare(key, node.Key) == 0 {
+			return node, nil
 		}
 
-		if sl.compare(key, node.key) == -1 {
+		if sl.compare(key, node.Key) == -1 {
 
 			level -= 1
 
@@ -92,7 +92,7 @@ func (sl *SkipList) Get(key []byte) ([]byte, error) {
 
 		}
 
-		if sl.compare(key, node.key) == 1 {
+		if sl.compare(key, node.Key) == 1 {
 
 			next_node := node.nexts[level]
 
@@ -149,7 +149,7 @@ func (sl *SkipList) Insert(key []byte, value []byte) int {
 				break
 			}
 
-			if sl.compare(key, n.key) == -1 {
+			if sl.compare(key, n.Key) == -1 {
 
 				newNode.nexts[i] = n
 
@@ -162,7 +162,7 @@ func (sl *SkipList) Insert(key []byte, value []byte) int {
 				break
 			}
 
-			if sl.compare(key, n.key) == 1 {
+			if sl.compare(key, n.Key) == 1 {
 				b = n
 				n = n.nexts[i]
 			}

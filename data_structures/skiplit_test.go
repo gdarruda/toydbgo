@@ -40,7 +40,7 @@ func TestInsert(t *testing.T) {
 
 	for _, k := range [4]string{"10", "12", "13", "15"} {
 
-		if !bytes.Equal(node.key, []byte(k)) {
+		if !bytes.Equal(node.Key, []byte(k)) {
 			t.Fatalf("Expected %v value on base list, found: %v", k, node)
 		}
 
@@ -66,15 +66,15 @@ func TestGet(t *testing.T) {
 
 	for i := 1; i <= 100; i++ {
 
-		value, err := list.Get([]byte(fmt.Sprintf("%03d", i)))
+		node, err := list.Get([]byte(fmt.Sprintf("%03d", i)))
 		expected := []byte(strconv.FormatInt(int64(i), 10))
 
 		if err != nil {
 			t.Fatalf("Error should be found, got %v", expected)
 		}
 
-		if !bytes.Equal(value, expected) {
-			t.Fatalf("Value should be equal for %v, got %v", value, expected)
+		if !bytes.Equal(node.Value, expected) {
+			t.Fatalf("Value should be equal for %v, got %v", node.Value, expected)
 		}
 	}
 

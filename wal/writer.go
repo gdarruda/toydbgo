@@ -19,7 +19,7 @@ type Record struct {
 }
 
 type WAL struct {
-	file *os.File
+	File *os.File
 	enc  *gob.Encoder
 }
 
@@ -57,6 +57,6 @@ func (wal *WAL) Append(content Record) error {
 }
 
 func (wal *WAL) Delete() {
-	wal.file.Close()
-	os.Remove(wal.file.Name())
+	wal.File.Close()
+	os.Remove(wal.File.Name())
 }

@@ -12,7 +12,7 @@ func TestNewLog(t *testing.T) {
 	name := "table_example"
 	wal := NewLog(name)
 
-	if !strings.HasPrefix(wal.file.Name(), name+"_") {
+	if !strings.HasPrefix(wal.File.Name(), name+"_") {
 		t.Fatalf("Expected filename starting with log_")
 	}
 
