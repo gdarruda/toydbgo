@@ -89,14 +89,14 @@ func TestMerge(t *testing.T) {
 	f, _ := os.Open(table.wal.File.Name())
 	dec := gob.NewDecoder(f)
 
-	var put wal.Record
+	var put, merge wal.Record
+
 	dec.Decode(&put)
 
 	if !bytes.Equal(put.Value, []byte("a")) {
 		t.Fatalf("Put log should contain a, got '%v' instead", put.Value)
 	}
 
-	var merge wal.Record
 	dec.Decode(&merge)
 
 	if !bytes.Equal(merge.Value, []byte("new value")) {
