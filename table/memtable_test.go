@@ -92,7 +92,16 @@ func TestMerge(t *testing.T) {
 	var put wal.Record
 	dec.Decode(&put)
 
-	bytes.Equal(put.Value, []byte("a"))
+	if !bytes.Equal(put.Value, []byte("a")) {
+		t.Fatalf("Put log should contain a, got '%v' instead", put.Value)
+	}
+
+	var merge wal.Record
+	dec.Decode(&merge)
+
+	if !bytes.Equal(merge.Value, []byte("new value")) {
+		t.Fatalf("Put log should contain b, got '%v' instead", merge.Value)
+	}
 
 	table.wal.Delete()
 }
