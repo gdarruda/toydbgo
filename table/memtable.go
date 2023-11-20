@@ -63,3 +63,20 @@ func (t *Table) Merge(
 	return node, err
 
 }
+
+func (t *Table) Delete(
+	key []byte) (*data_structures.Node, error) {
+
+	node, err := t.content.Get(key)
+
+	if err != nil {
+		return nil, err
+	}
+
+	t.wal.Append(wal.NewRecord(node.Key, nil, base_types.DEL))
+
+	node.Verb = base_types.DEL
+
+	return node, err
+
+}

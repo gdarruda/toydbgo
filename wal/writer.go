@@ -36,13 +36,13 @@ func NewRecord(
 		key,
 		value,
 		MD5KeyValue(key, value),
-		base_types.PUT}
+		verb}
 
 }
 
 func NewLog(table_name string) WAL {
 
-	f, err := os.Create(fmt.Sprintf("%v_%v.txt", table_name, uuid.NewString()))
+	f, err := os.Create(fmt.Sprintf("%v_%v.tdb", table_name, uuid.NewString()))
 
 	if err != nil {
 		log.Fatal(err)

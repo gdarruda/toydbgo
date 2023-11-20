@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"gdarruda.me/todydbgo/base_types"
@@ -23,10 +24,25 @@ func TestCreate(t *testing.T) {
 
 }
 
+func Setup() Table {
+	name := "example_table"
+	return Create(name, nil)
+}
+
+func Cleanup(f *os.File, table Table) {
+	f.Close()
+	table.wal.Delete()
+
+	files, _ := filepath.Glob("example_table_*")
+
+	for _, f := range files {
+		os.Remove(f)
+	}
+}
+
 func TestPut(t *testing.T) {
 
-	name := "example_table"
-	table := Create(name, nil)
+	table := Setup()
 
 	table.Put([]byte("1"), []byte("a"))
 	table.Put([]byte("2"), []byte("b"))
@@ -64,15 +80,13 @@ func TestPut(t *testing.T) {
 		}
 	}
 
-	f.Close()
-	table.wal.Delete()
+	t.Cleanup(func() { Cleanup(f, table) })
 
 }
 
 func TestMerge(t *testing.T) {
 
-	name := "example_table"
-	table := Create(name, nil)
+	table := Setup()
 
 	table.Put([]byte("1"), []byte("a"))
 	table.Merge([]byte("1"), []byte("new value"))
@@ -103,5 +117,32 @@ func TestMerge(t *testing.T) {
 		t.Fatalf("Put log should contain b, got '%v' instead", merge.Value)
 	}
 
-	table.wal.Delete()
+	t.Cleanup(func() { Cleanup(f, table) })
+}
+
+func TestDelete(t *testing.T) {
+
+	table := Setup()
+
+	table.Put([]byte("1"), []byte("a"))
+	node, _ := table.Delete([]byte("1"))
+
+	if node.Verb != base_types.DEL {
+		t.Fatalf("Verb should be deleted, got %v instead", node.Verb)
+	}
+
+	f, _ := os.Open(table.wal.File.Name())
+	dec := gob.NewDecoder(f)
+
+	var delete wal.Record
+
+	dec.Decode(&delete)
+	dec.Decode(&delete)
+
+	if delete.Verb != base_types.DEL {
+		t.Fatalf("Put log should change verb do DEL, got '%v' instead", delete.Verb)
+	}
+
+	t.Cleanup(func() { Cleanup(f, table) })
+
 }
