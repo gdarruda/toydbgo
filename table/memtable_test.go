@@ -11,22 +11,22 @@ import (
 	"gdarruda.me/todydbgo/wal"
 )
 
+func Setup() Table {
+	name := "example_table"
+	return Create(name, nil, 64)
+}
+
 func TestCreate(t *testing.T) {
 
+	table := Setup()
 	name := "example_table"
-	table := Create(name, nil)
 
-	if table.name != name {
+	if table.name != "example_table" {
 		t.Fatalf("Expected table name '%v', got '%v' instead", name, table.name)
 	}
 
 	table.wal.Delete()
 
-}
-
-func Setup() Table {
-	name := "example_table"
-	return Create(name, nil)
 }
 
 func Cleanup(f *os.File, table Table) {
@@ -57,6 +57,10 @@ func TestPut(t *testing.T) {
 
 	if !bytes.Equal(node.Value, []byte("b")) {
 		t.Fatalf("Expected value b, got '%v' instead", node.Value)
+	}
+
+	if table.size != 4 {
+		t.Fatalf("Expected table with 4 bytes, got '%v' instead", table.size)
 	}
 
 	f, _ := os.Open(table.wal.File.Name())
@@ -100,6 +104,10 @@ func TestMerge(t *testing.T) {
 			[]byte("new value"))
 	}
 
+	if table.size != 10 {
+		t.Fatalf("Expected table with 10 bytes, got '%v' instead", table.size)
+	}
+
 	f, _ := os.Open(table.wal.File.Name())
 	dec := gob.NewDecoder(f)
 
@@ -129,6 +137,10 @@ func TestDelete(t *testing.T) {
 
 	if node.Verb != base_types.DEL {
 		t.Fatalf("Verb should be deleted, got %v instead", node.Verb)
+	}
+
+	if table.size != 1 {
+		t.Fatalf("Expected table with 1 bytes, got '%v' instead", table.size)
 	}
 
 	f, _ := os.Open(table.wal.File.Name())

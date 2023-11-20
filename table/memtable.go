@@ -13,14 +13,21 @@ type Table struct {
 	content        data_structures.SkipList
 	wal            wal.WAL
 	merge_function func([]byte, []byte) []byte
+	size           int
+	max_size       int
 }
 
 func Create(
 	name string,
-	merge_function func([]byte, []byte) []byte) Table {
+	merge_function func([]byte, []byte) []byte,
+	max_size int) Table {
 
 	if merge_function == nil {
 		merge_function = func(old []byte, new []byte) []byte { return new }
+	}
+
+	if max_size == 0 {
+		max_size = 64_000_000
 	}
 
 	list := data_structures.NewSkipList(
@@ -31,7 +38,9 @@ func Create(
 		name,
 		list,
 		wal.NewLog(name),
-		merge_function}
+		merge_function,
+		0,
+		max_size}
 
 	return table
 
@@ -43,6 +52,7 @@ func (t *Table) Put(
 
 	t.wal.Append(wal.NewRecord(key, value, base_types.PUT))
 	t.content.Insert(key, value)
+	t.size += len(key) + len(value)
 
 }
 
@@ -51,14 +61,17 @@ func (t *Table) Merge(
 	value []byte) (*data_structures.Node, error) {
 
 	node, err := t.content.Get(key)
+	value_size := len(node.Value)
 
 	if err != nil {
 		return nil, err
 	}
 
 	t.wal.Append(wal.NewRecord(key, value, base_types.MERGE))
+	new_value := t.merge_function(node.Value, value)
+	t.size += len(new_value) - value_size
 
-	node.Value = t.merge_function(node.Value, value)
+	node.Value = new_value
 
 	return node, err
 
@@ -68,13 +81,16 @@ func (t *Table) Delete(
 	key []byte) (*data_structures.Node, error) {
 
 	node, err := t.content.Get(key)
+	value_size := len(node.Value)
 
 	if err != nil {
 		return nil, err
 	}
 
 	t.wal.Append(wal.NewRecord(node.Key, nil, base_types.DEL))
+	t.size -= value_size
 
+	node.Value = nil
 	node.Verb = base_types.DEL
 
 	return node, err
