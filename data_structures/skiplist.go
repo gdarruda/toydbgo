@@ -23,8 +23,8 @@ type Node struct {
 }
 
 type SkipList struct {
-	heads     []*Node
-	levels    int
+	Heads     []*Node
+	Levels    int
 	compare   func([]byte, []byte) int
 	formatKey func([]byte) string
 }
@@ -45,9 +45,9 @@ func GetLevel() int {
 
 func (sl *SkipList) Print() {
 
-	for i := sl.levels - 1; i >= 0; i-- {
+	for i := sl.Levels - 1; i >= 0; i-- {
 
-		step := sl.heads[i]
+		step := sl.Heads[i]
 
 		for {
 
@@ -66,9 +66,9 @@ func (sl *SkipList) Print() {
 
 func (sl *SkipList) Get(key []byte) (*Node, error) {
 
-	level := sl.levels - 1
-	node := sl.heads[level]
-	befores := sl.heads
+	level := sl.Levels - 1
+	node := sl.Heads[level]
+	befores := sl.Heads
 
 	for {
 
@@ -119,11 +119,11 @@ func (sl *SkipList) Insert(key []byte, value []byte) int {
 	level := GetLevel()
 
 	for {
-		if level <= sl.levels {
+		if level <= sl.Levels {
 			break
 		}
-		sl.levels += 1
-		sl.heads = append(sl.heads, nil)
+		sl.Levels += 1
+		sl.Heads = append(sl.Heads, nil)
 	}
 
 	newNode := Node{
@@ -134,12 +134,12 @@ func (sl *SkipList) Insert(key []byte, value []byte) int {
 
 	for i := level - 1; i >= 0; i-- {
 
-		if sl.heads[i] == nil {
-			sl.heads[i] = &newNode
+		if sl.Heads[i] == nil {
+			sl.Heads[i] = &newNode
 			continue
 		}
 
-		n := sl.heads[i]
+		n := sl.Heads[i]
 		var b *Node
 
 		for {
@@ -154,7 +154,7 @@ func (sl *SkipList) Insert(key []byte, value []byte) int {
 				newNode.nexts[i] = n
 
 				if b == nil {
-					sl.heads[i] = &newNode
+					sl.Heads[i] = &newNode
 				} else {
 					b.nexts[i] = &newNode
 				}
