@@ -13,12 +13,12 @@ func TestNewList(t *testing.T) {
 		bytes.Compare,
 		func(v []byte) string { return string(v[:]) })
 
-	if empty_list.heads != nil {
-		t.Fatalf("Expected empty list: %v", empty_list.heads)
+	if empty_list.Heads != nil {
+		t.Fatalf("Expected empty list: %v", empty_list.Heads)
 	}
 
-	if empty_list.levels != 0 {
-		t.Fatalf("Expected 0 levels, found: %v", empty_list.levels)
+	if empty_list.Levels != 0 {
+		t.Fatalf("Expected 0 levels, found: %v", empty_list.Levels)
 	}
 
 }
@@ -36,7 +36,7 @@ func TestInsert(t *testing.T) {
 
 	list.Print()
 
-	node := list.heads[0]
+	node := list.Heads[0]
 
 	for _, k := range [4]string{"10", "12", "13", "15"} {
 
